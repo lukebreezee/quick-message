@@ -1,26 +1,37 @@
-const express = require('express');
 const dotenv = require('dotenv');
-const cors = require('cors');
-const db = require('./config/db.js');
-
 dotenv.config();
 
+const express = require('express');
 const app = express();
-exports.app = app;
+
+const cors = require('cors');
+const http = require('http');
+const {Server} = require('socket.io');
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(
-  cors({
+  cors(/*{
     origin: [process.env.CLIENT_ORIGIN],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
-  })
+  }*/)
 );
 
-require('./routes/auth.js');
-require('./routes/messaging.js');
+require('./routes/auth.js')(app);
+require('./routes/messaging.js')(app);
+
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: 'http://localhost:19002',
+    methods: ['GET', 'POST'],
+  },
+});
+
+require('./realTimeEvents.js')(io);
 
 const port = process.env.PORT || 3000;
 
-app.listen(port, () => console.log(`Listening on port ${port}`));
+server.listen(port, () => console.log(`Listening on port ${port}`));

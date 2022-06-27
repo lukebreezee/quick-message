@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import authContext from '../../context/auth/context';
 import {getAllConversations, getUserData, logOut} from '../../api/serverCalls';
+import {io} from 'socket.io-client';
 
 export default ({navigation}) => {
   const [status, setStatus] = useState('');
@@ -25,6 +26,10 @@ export default ({navigation}) => {
   const handleGetData = async () => {
     const user = await getUserData();
     setStatus(user);
+  };
+
+  const handleConnect = async () => {
+    const socket = io('http://10.0.2.2:3000');
   };
 
   useEffect(() => {
@@ -65,6 +70,10 @@ export default ({navigation}) => {
       </TouchableWithoutFeedback>
       <Button title="Log Out" onPress={() => handleLogOut()} />
       <Button title="Get Data" onPress={() => handleGetData()} />
+      <Button
+        title="Initialize Socket Connection"
+        onPress={() => handleConnect()}
+      />
       {status.length !== 0 && <Text>{status}</Text>}
       <Text>Conversations:</Text>
       {conversations.map(conversation => (
